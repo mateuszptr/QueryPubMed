@@ -69,12 +69,12 @@ public class CustomContentHandler extends DefaultHandler {
                 break;
             }
             case "abstracttext": {
-                Field field = new TextField(currentElement, new String(chars, start, length), Field.Store.NO);
+                Field field = new TextField(currentElement, new String(chars, start, length), Field.Store.YES);
                 doc.add(field);
                 break;
             }
             case "keyword": {
-                Field field = new StringField(currentElement, new String(chars, start, length), Field.Store.YES);
+                Field field = new TextField(currentElement, new String(chars, start, length), Field.Store.YES);
                 doc.add(field);
                 break;
             }
@@ -82,6 +82,8 @@ public class CustomContentHandler extends DefaultHandler {
                 Field field = new TextField(currentElement, new String(chars, start, length), Field.Store.YES);
                 doc.add(field);
                 break;
+                
+                
             }
             default:
                 break;

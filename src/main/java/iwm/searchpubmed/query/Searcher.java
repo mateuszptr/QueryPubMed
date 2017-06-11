@@ -5,17 +5,22 @@
  */
 package iwm.searchpubmed.query;
 
+import iwm.searchpubmed.Constants;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.StopwordAnalyzerBase;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -25,36 +30,24 @@ import org.apache.lucene.store.FSDirectory;
  * @author eobard
  */
 public class Searcher {
+
     IndexSearcher indexSearcher;
-    IndexReader indexReader;
-    QueryParser queryParser;
-    Query query;
+    IndexReader reader;
+    MultiFieldQueryParser parser;
     
-    public Searcher(String path) throws IOException, ParseException {
-        Directory indexDirectory = FSDirectory.open(new File(path).toPath());
-        queryParser = new QueryParser("abstracttext", new StandardAnalyzer());
-        indexReader = DirectoryReader.open(indexDirectory);
-        indexSearcher = new IndexSearcher(indexReader);
+    public Searcher() throws IOException {
+        Directory directory = FSDirectory.open(new File(Constants.INDEX_PATH).toPath());
+        reader = DirectoryReader.open(directory);
+        CharArraySet arraySet = new CharArraySet(Arrays.asList(new File("stopwords.txt").toString().split("\n")), true);
+        parser = new MultiFieldQueryParser(Constants.FIELDS, new EnglishAnalyzer(arraySet));
+        indexSearcher = new IndexSearcher(reader);
+        
     }
     
-    public TopDocs search(String queryString, int maxHits) throws ParseException, IOException {
-        query = queryParser.parse(queryString);
-        TopDocs hits = indexSearcher.search(query, maxHits);
+    public TopDocs search(String queryString) throws ParseException, IOException {
+        Query query = parser.parse(queryString);
+        TopDocs hits = indexSearcher.search(query, Constants.MAX_DOCS);
         return hits;
     }
     
-    public Document getDocument(ScoreDoc sd) throws IOException {
-        return indexSearcher.doc(sd.doc);
-    }
-    
-    public static void main(String[] args) throws IOException, ParseException {
-        Searcher searcher = new Searcher("index");
-        
-        TopDocs hits = searcher.search("dissociative identity", 10);
-        
-        for(ScoreDoc sd : hits.scoreDocs) {
-            Document d = searcher.getDocument(sd);
-            System.out.println(d.getField("pmid").stringValue()+": "+d.getField("articletitle").stringValue()+" ("+sd.score+")\n");
-        }
-    }
 }

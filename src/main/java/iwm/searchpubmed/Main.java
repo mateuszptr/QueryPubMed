@@ -6,7 +6,7 @@
 package iwm.searchpubmed;
 
 import iwm.searchpubmed.indexer.Indexer;
-import iwm.searchpubmed.query.Searcher;
+import iwm.searchpubmed.query.TestSearcher;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -21,6 +21,6 @@ public class Main {
         System.out.println("Hello World");
      
         Indexer.main(args);
-        Searcher.main(args);
+        TestSearcher.main(args);
     }
 }

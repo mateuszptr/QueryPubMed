@@ -7,7 +7,6 @@ package iwm.searchpubmed.indexer;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
@@ -17,7 +16,6 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.xml.sax.SAXException;
@@ -51,7 +49,7 @@ public class Indexer {
     }
     
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException {
-        Indexer indexer = new Indexer("index");
+        Indexer indexer = new Indexer("/tmp/lucene-index/");
         
         File dir = new File("snapshots");
         File[] files = dir.listFiles();
