@@ -5,9 +5,13 @@
  */
 package iwm.searchpubmed.query;
 
+import iwm.searchpubmed.Constants;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -36,13 +40,15 @@ public class TestSearcher {
     
     public TestSearcher(String path) throws IOException, ParseException {
         Directory indexDirectory = FSDirectory.open(new File(path).toPath());
-        queryParser = new QueryParser("abstracttext", new StandardAnalyzer(new FileReader("stopwords.txt")));
+        CharArraySet arraySet = new CharArraySet(Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH)), true);
+        queryParser = new QueryParser("abstracttext", new EnglishAnalyzer(arraySet));
         indexReader = DirectoryReader.open(indexDirectory);
         indexSearcher = new IndexSearcher(indexReader);
     }
     
     public TopDocs search(String queryString, int maxHits) throws ParseException, IOException {
         query = queryParser.parse(queryString);
+        System.out.println(query.toString("abstracttext"));
         TopDocs hits = indexSearcher.search(query, maxHits);
         
         return hits;
@@ -55,7 +61,7 @@ public class TestSearcher {
     public static void main(String[] args) throws IOException, ParseException {
         TestSearcher searcher = new TestSearcher("/tmp/lucene-index");
         
-        TopDocs hits = searcher.search("dissociative identity", 10);
+        TopDocs hits = searcher.search("cancers and their symptoms", 10);
         
         for(ScoreDoc sd : hits.scoreDocs) {
             Document d = searcher.getDocument(sd);

@@ -5,14 +5,21 @@
  */
 package iwm.searchpubmed.indexer;
 
+import iwm.searchpubmed.Constants;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -29,8 +36,9 @@ public class Indexer {
     
     public Indexer(String path) throws IOException {
         Directory indexDirectory = FSDirectory.open(new File(path).toPath());
-        
-        writer = new IndexWriter(indexDirectory, new IndexWriterConfig(new StandardAnalyzer()));
+        CharArraySet arraySet = new CharArraySet(Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH)), true);
+
+        writer = new IndexWriter(indexDirectory, new IndexWriterConfig(new EnglishAnalyzer(arraySet)));
     }
     
     public void indexDocuments(File file) throws SAXException, IOException, ParserConfigurationException {

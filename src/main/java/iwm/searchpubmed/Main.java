@@ -8,6 +8,8 @@ package iwm.searchpubmed;
 import iwm.searchpubmed.indexer.Indexer;
 import iwm.searchpubmed.query.TestSearcher;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.xml.sax.SAXException;
@@ -18,9 +20,13 @@ import org.xml.sax.SAXException;
  */
 public class Main {
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, ParseException {
-        System.out.println("Hello World");
-     
-        Indexer.main(args);
-        TestSearcher.main(args);
+//        System.out.println("Hello World");
+//     
+//        Indexer.main(args);
+//        TestSearcher.main(args);
+
+        for(String s : Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH))) {
+            System.out.println(s);
+        }
     }
 }

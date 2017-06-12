@@ -5,9 +5,12 @@
  */
 package iwm.searchpubmed.query;
 
+import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
 import iwm.searchpubmed.Constants;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
@@ -31,23 +34,51 @@ import org.apache.lucene.store.FSDirectory;
  */
 public class Searcher {
 
-    IndexSearcher indexSearcher;
-    IndexReader reader;
-    MultiFieldQueryParser parser;
-    
+    private IndexSearcher indexSearcher;
+    private IndexReader reader;
+    private MultiFieldQueryParser parser;
+
     public Searcher() throws IOException {
         Directory directory = FSDirectory.open(new File(Constants.INDEX_PATH).toPath());
         reader = DirectoryReader.open(directory);
-        CharArraySet arraySet = new CharArraySet(Arrays.asList(new File("stopwords.txt").toString().split("\n")), true);
+        CharArraySet arraySet = new CharArraySet(Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH)), true);
         parser = new MultiFieldQueryParser(Constants.FIELDS, new EnglishAnalyzer(arraySet));
-        indexSearcher = new IndexSearcher(reader);
-        
+        indexSearcher = new IndexSearcher(getReader());
+
     }
-    
+
     public TopDocs search(String queryString) throws ParseException, IOException {
-        Query query = parser.parse(queryString);
-        TopDocs hits = indexSearcher.search(query, Constants.MAX_DOCS);
+        Query query = getParser().parse(queryString);
+
+        TopDocs hits = getIndexSearcher().search(query, Constants.MAX_DOCS);
+        
         return hits;
     }
-    
+
+    public static void main(String[] args) throws ParseException, IOException {
+        Searcher s = new Searcher();
+        Query q = s.getParser().parse("cancers and their symptoms");
+        
+    }
+
+    /**
+     * @return the indexSearcher
+     */
+    public IndexSearcher getIndexSearcher() {
+        return indexSearcher;
+    }
+
+    /**
+     * @return the reader
+     */
+    public IndexReader getReader() {
+        return reader;
+    }
+
+    /**
+     * @return the parser
+     */
+    public MultiFieldQueryParser getParser() {
+        return parser;
+    }
 }
