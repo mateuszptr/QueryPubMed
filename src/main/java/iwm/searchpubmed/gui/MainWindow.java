@@ -29,25 +29,20 @@ public class MainWindow extends javax.swing.JFrame {
 
         searchTextField = new javax.swing.JTextField();
         searchButton = new javax.swing.JButton();
-        sortingComboBox = new javax.swing.JComboBox<>();
         tableScrollPane = new javax.swing.JScrollPane();
         table = new javax.swing.JTable();
+        jCheckBox1 = new javax.swing.JCheckBox();
+        jCheckBox2 = new javax.swing.JCheckBox();
+        jCheckBox3 = new javax.swing.JCheckBox();
+        jCheckBox4 = new javax.swing.JCheckBox();
+        jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        searchTextField.setText("jTextField1");
-
-        searchButton.setText("jButton1");
-
-        sortingComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TF", "TF-IDF", "Custom1", "Custom2" }));
-        sortingComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sortingComboBoxActionPerformed(evt);
-            }
-        });
+        searchButton.setText("Search");
 
         table.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -79,6 +74,18 @@ public class MainWindow extends javax.swing.JFrame {
         tableScrollPane.setViewportView(table);
         table.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
+        jCheckBox1.setSelected(true);
+        jCheckBox1.setText("TF");
+        jCheckBox1.setEnabled(false);
+
+        jCheckBox2.setText("IDF");
+
+        jCheckBox3.setText("Impact Factor");
+
+        jCheckBox4.setText("Eigenfactor");
+
+        jButton1.setText("Rocchio");
+
         jMenu1.setText("Plik");
 
         jMenuItem1.setText("Załaduj zrzut");
@@ -95,12 +102,21 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sortingComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jCheckBox1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCheckBox2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCheckBox3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCheckBox4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(searchTextField)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(searchButton))
-                    .addComponent(tableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE))
+                    .addComponent(tableScrollPane))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -111,18 +127,19 @@ public class MainWindow extends javax.swing.JFrame {
                     .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(searchButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sortingComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCheckBox1)
+                    .addComponent(jCheckBox2)
+                    .addComponent(jCheckBox3)
+                    .addComponent(jCheckBox4)
+                    .addComponent(jButton1))
+                .addGap(10, 10, 10)
+                .addComponent(tableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void sortingComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortingComboBoxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_sortingComboBoxActionPerformed
 
     /**
      * @param args the command line arguments
@@ -160,12 +177,16 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JCheckBox jCheckBox2;
+    private javax.swing.JCheckBox jCheckBox3;
+    private javax.swing.JCheckBox jCheckBox4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JButton searchButton;
     private javax.swing.JTextField searchTextField;
-    private javax.swing.JComboBox<String> sortingComboBox;
     private javax.swing.JTable table;
     private javax.swing.JScrollPane tableScrollPane;
     // End of variables declaration//GEN-END:variables

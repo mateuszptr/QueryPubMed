@@ -30,17 +30,24 @@ public class CustomContentHandler extends DefaultHandler {
     private IndexWriter indexWriter;
     private Document doc;
     String currentElement;
-    //private List<Document> docs;
-    
+    State state;
+
+    enum State {
+        EMPTY, JOURNAL
+    }
+
     public CustomContentHandler(IndexWriter indexWriter) {
         super();
         this.indexWriter = indexWriter;
         currentElement = "";
-        //docs = new LinkedList<>();
+        state = State.EMPTY;
     }
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attr) throws SAXException {
+        if (qName.equalsIgnoreCase("Journal")) {
+            state = State.JOURNAL;
+        }
         if (qName.equalsIgnoreCase("PubmedArticle")) {
             doc = new Document();
         }
@@ -49,6 +56,9 @@ public class CustomContentHandler extends DefaultHandler {
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
+        if (qName.equalsIgnoreCase("Journal")) {
+            state = State.EMPTY;
+        }
         if (qName.equalsIgnoreCase("PubmedArticle")) {
             try {
                 //docs.add(doc);
@@ -62,6 +72,26 @@ public class CustomContentHandler extends DefaultHandler {
 
     @Override
     public void characters(char[] chars, int start, int length) throws SAXException {
+        if (state == State.JOURNAL) {
+            switch (currentElement) {
+                case "issn": {
+                    Field field = new StringField(currentElement, new String(chars, start, length), Field.Store.YES);
+                    doc.add(field);
+                    break;
+                }
+                case "title": {
+                    Field field = new StringField("journaltitle", new String(chars, start, length), Field.Store.YES);
+                    doc.add(field);
+                    break;
+                }
+                case "isoabbreviation": {
+                    Field field = new StringField(currentElement, new String(chars, start, length), Field.Store.YES);
+                    doc.add(field);
+                    break;
+                }
+            }
+        }
+
         switch (currentElement) {
             case "pmid": {
                 Field field = new StringField(currentElement, new String(chars, start, length), Field.Store.YES);
@@ -82,8 +112,7 @@ public class CustomContentHandler extends DefaultHandler {
                 Field field = new TextField(currentElement, new String(chars, start, length), Field.Store.YES);
                 doc.add(field);
                 break;
-                
-                
+
             }
             default:
                 break;
