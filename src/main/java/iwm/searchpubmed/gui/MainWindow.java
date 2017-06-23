@@ -5,17 +5,35 @@
  */
 package iwm.searchpubmed.gui;
 
+import iwm.searchpubmed.Constants;
+import iwm.searchpubmed.indexer.Indexer;
+import iwm.searchpubmed.query.Searcher;
+import iwm.searchpubmed.query.Sorter;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.text.Document;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+
 /**
  *
  * @author eobard
  */
 public class MainWindow extends javax.swing.JFrame {
 
+    Searcher searcher;
+    Sorter sorter;
+    
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
+        initLogic();
     }
 
     /**
@@ -29,67 +47,59 @@ public class MainWindow extends javax.swing.JFrame {
 
         searchTextField = new javax.swing.JTextField();
         searchButton = new javax.swing.JButton();
-        tableScrollPane = new javax.swing.JScrollPane();
-        table = new javax.swing.JTable();
-        jCheckBox1 = new javax.swing.JCheckBox();
-        jCheckBox2 = new javax.swing.JCheckBox();
-        jCheckBox3 = new javax.swing.JCheckBox();
-        jCheckBox4 = new javax.swing.JCheckBox();
-        jButton1 = new javax.swing.JButton();
+        tfCheckBox = new javax.swing.JCheckBox();
+        idfCheckBox = new javax.swing.JCheckBox();
+        ifCheckBox = new javax.swing.JCheckBox();
+        eigenCheckBox = new javax.swing.JCheckBox();
+        editorScrollPane = new javax.swing.JScrollPane();
+        editorPane = new javax.swing.JEditorPane();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        loadSnapshotMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         searchButton.setText("Search");
-
-        table.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "Nr", "PMID", "Tytuł"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+        searchButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchButtonActionPerformed(evt);
             }
         });
-        table.setColumnSelectionAllowed(true);
-        tableScrollPane.setViewportView(table);
-        table.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
-        jCheckBox1.setSelected(true);
-        jCheckBox1.setText("TF");
-        jCheckBox1.setEnabled(false);
+        tfCheckBox.setSelected(true);
+        tfCheckBox.setText("TF");
+        tfCheckBox.setEnabled(false);
 
-        jCheckBox2.setText("IDF");
+        idfCheckBox.setText("IDF");
 
-        jCheckBox3.setText("Impact Factor");
+        ifCheckBox.setText("Impact Factor");
 
-        jCheckBox4.setText("Eigenfactor");
+        eigenCheckBox.setText("Eigenfactor");
 
-        jButton1.setText("Rocchio");
+        editorScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        editorScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        editorPane.setEditable(false);
+        editorScrollPane.setViewportView(editorPane);
+        HTMLEditorKit kit = new HTMLEditorKit();
+        editorPane.setEditorKit(kit);
+
+        String htmlString = "<h1>Welcome</h1>";
+        Document doc = kit.createDefaultDocument();
+        editorPane.setDocument(doc);
+        editorPane.setText(htmlString);
 
         jMenu1.setText("Plik");
 
-        jMenuItem1.setText("Załaduj zrzut");
-        jMenu1.add(jMenuItem1);
+        loadSnapshotMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        loadSnapshotMenuItem.setText("Load snapshot");
+        loadSnapshotMenuItem.setToolTipText("");
+        loadSnapshotMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadSnapshotMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(loadSnapshotMenuItem);
 
         jMenuBar1.add(jMenu1);
 
@@ -102,21 +112,20 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jCheckBox1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCheckBox2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCheckBox3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCheckBox4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1))
+                    .addComponent(editorScrollPane)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(searchTextField)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(searchButton))
-                    .addComponent(tableScrollPane))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(tfCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(idfCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(ifCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(eigenCheckBox)
+                        .addGap(0, 215, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -128,18 +137,41 @@ public class MainWindow extends javax.swing.JFrame {
                     .addComponent(searchButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCheckBox1)
-                    .addComponent(jCheckBox2)
-                    .addComponent(jCheckBox3)
-                    .addComponent(jCheckBox4)
-                    .addComponent(jButton1))
-                .addGap(10, 10, 10)
-                .addComponent(tableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
+                    .addComponent(tfCheckBox)
+                    .addComponent(idfCheckBox)
+                    .addComponent(ifCheckBox)
+                    .addComponent(eigenCheckBox))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(editorScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
+        // TODO add your handling code here:
+        System.out.println("iwm.searchpubmed.gui.MainWindow.searchButtonActionPerformed()");
+        
+    }//GEN-LAST:event_searchButtonActionPerformed
+
+    private void loadSnapshotMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadSnapshotMenuItemActionPerformed
+        try {
+            // TODO add your handling code here:
+            Indexer indexer = new Indexer(Constants.INDEX_PATH);
+            JFileChooser fc = new JFileChooser(Constants.SNAPSHOTS_PATH);
+            
+            int returnVal = fc.showOpenDialog(this);
+            if(returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                indexer.indexDocuments(file);
+            }
+
+            indexer.close();
+        } catch (IOException | SAXException | ParserConfigurationException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_loadSnapshotMenuItemActionPerformed
 
     /**
      * @param args the command line arguments
@@ -175,19 +207,28 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
     }
+    
+    private void initLogic() {
+        try {
+            searcher = new Searcher();
+            sorter = new Sorter(searcher);
+        } catch (IOException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JCheckBox jCheckBox2;
-    private javax.swing.JCheckBox jCheckBox3;
-    private javax.swing.JCheckBox jCheckBox4;
+    private javax.swing.JEditorPane editorPane;
+    private javax.swing.JScrollPane editorScrollPane;
+    private javax.swing.JCheckBox eigenCheckBox;
+    private javax.swing.JCheckBox idfCheckBox;
+    private javax.swing.JCheckBox ifCheckBox;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem loadSnapshotMenuItem;
     private javax.swing.JButton searchButton;
     private javax.swing.JTextField searchTextField;
-    private javax.swing.JTable table;
-    private javax.swing.JScrollPane tableScrollPane;
+    private javax.swing.JCheckBox tfCheckBox;
     // End of variables declaration//GEN-END:variables
 }

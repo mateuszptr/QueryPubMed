@@ -20,13 +20,6 @@ import org.xml.sax.SAXException;
  */
 public class Main {
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, ParseException {
-//        System.out.println("Hello World");
-//     
-//        Indexer.main(args);
-//        TestSearcher.main(args);
-
-        for(String s : Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH))) {
-            System.out.println(s);
-        }
+        
     }
 }

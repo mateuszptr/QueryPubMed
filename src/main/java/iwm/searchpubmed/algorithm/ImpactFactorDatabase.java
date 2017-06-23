@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.lucene.document.Document;
 
 /**
  *
@@ -39,6 +40,16 @@ public class ImpactFactorDatabase {
             eigenFactor.put(issn, eigenfactor);
         }
 
+    }
+    
+    public double getImpactFactor(Document doc) {
+        String issn = doc.getField("issn").stringValue();
+        return impactFactor.get(issn);
+    }
+    
+    public double getEigenfactor(Document doc) {
+        String issn = doc.getField("issn").stringValue();
+        return eigenFactor.get(issn);
     }
 
 }

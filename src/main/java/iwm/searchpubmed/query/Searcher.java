@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.StopwordAnalyzerBase;
@@ -46,6 +48,20 @@ public class Searcher {
         indexSearcher = new IndexSearcher(getReader());
 
     }
+    
+    public String[] termList(String queryString) {
+        try {
+            CharArraySet arraySet = new CharArraySet(Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH)), true);
+            QueryParser dummy = new QueryParser("", new EnglishAnalyzer(arraySet));
+            String parsedString = dummy.parse(queryString).toString();
+            
+            String[] termList = parsedString.split("\\s+");
+            return termList;
+        } catch (IOException | ParseException ex) {
+            Logger.getLogger(Searcher.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
 
     public TopDocs search(String queryString) throws ParseException, IOException {
         Query query = getParser().parse(queryString);
@@ -58,7 +74,7 @@ public class Searcher {
     public static void main(String[] args) throws ParseException, IOException {
         Searcher s = new Searcher();
         Query q = s.getParser().parse("cancers and their symptoms");
-        
+        System.out.println(q.toString());
     }
 
     /**

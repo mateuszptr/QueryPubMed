@@ -49,7 +49,7 @@ public class TFIDF {
 
     }
 
-    public double score(Document doc) {
+    public double score(Document doc, boolean idf) {
 
         Map<String, Double> scores = new HashMap<>();
 
@@ -64,11 +64,18 @@ public class TFIDF {
                     }
                 }
                 double score = termCount * 1.0 / wordCount;
-                scores.put(term, score * idfs.get(term));
+                if (idf) {
+                    score *= idfs.get(term);
+                }
+                scores.put(term, score);
             }
         }
-        
+
         return scores.values().stream().mapToDouble(t -> t).average().getAsDouble();
+    }
+
+    public double score(Document doc) {
+        return score(doc, true);
     }
 
     private boolean contains(Document doc, String term) {
@@ -93,14 +100,14 @@ public class TFIDF {
                     count++;
                 }
             }
-            double score = Math.log10(docsCount / (count + 1.0));
+            double score = Math.log(docsCount / (count + 1.0));
             idfs.put(term, score);
         }
     }
 
     public static void main(String[] args) throws IOException, ParseException {
-        String queryString = "prayer and homeopathy";
-        
+        String queryString = "cancers and their symptoms";
+
         Searcher searcher = new Searcher();
         TopDocs hits = searcher.search(queryString);
         TFIDF tfidf = new TFIDF(queryString, searcher.getIndexSearcher(), hits);
@@ -117,7 +124,6 @@ public class TFIDF {
             return -Double.compare(scores.get(t), scores.get(t1));
         });
 
-        
         for (ScoreDoc t : hits.scoreDocs) {
             try {
                 Document d = searcher.getIndexSearcher().doc(t.doc);
