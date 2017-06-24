@@ -9,14 +9,19 @@ import iwm.searchpubmed.Constants;
 import iwm.searchpubmed.indexer.Indexer;
 import iwm.searchpubmed.query.Searcher;
 import iwm.searchpubmed.query.Sorter;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.xml.parsers.ParserConfigurationException;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.TopDocs;
 import org.xml.sax.SAXException;
 
 /**
@@ -27,7 +32,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     Searcher searcher;
     Sorter sorter;
-    
+    HTMLGenerator htmlGenerator;
+
     /**
      * Creates new form MainWindow
      */
@@ -80,11 +86,16 @@ public class MainWindow extends javax.swing.JFrame {
         editorScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         editorPane.setEditable(false);
+        editorPane.addHyperlinkListener(new javax.swing.event.HyperlinkListener() {
+            public void hyperlinkUpdate(javax.swing.event.HyperlinkEvent evt) {
+                editorPaneHyperlinkUpdate(evt);
+            }
+        });
         editorScrollPane.setViewportView(editorPane);
         HTMLEditorKit kit = new HTMLEditorKit();
         editorPane.setEditorKit(kit);
 
-        String htmlString = "<h1>Welcome</h1>";
+        String htmlString = "<table><tr><td>Keyword:</td><td><input></td></tr></table>";
         Document doc = kit.createDefaultDocument();
         editorPane.setDocument(doc);
         editorPane.setText(htmlString);
@@ -150,9 +161,17 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
-        // TODO add your handling code here:
-        System.out.println("iwm.searchpubmed.gui.MainWindow.searchButtonActionPerformed()");
-        
+        try {
+            // TODO add your handling code here:
+            System.out.println("iwm.searchpubmed.gui.MainWindow.searchButtonActionPerformed()");
+            String queryString = searchTextField.getText();
+            TopDocs hits = sorter.sortedDocuments(queryString, idfCheckBox.isSelected(), ifCheckBox.isSelected(), eigenCheckBox.isSelected());
+            String htmlText = htmlGenerator.generateHTML(queryString, hits);
+            editorPane.setText(htmlText);
+        } catch (IOException | ParseException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }//GEN-LAST:event_searchButtonActionPerformed
 
     private void loadSnapshotMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadSnapshotMenuItemActionPerformed
@@ -160,9 +179,9 @@ public class MainWindow extends javax.swing.JFrame {
             // TODO add your handling code here:
             Indexer indexer = new Indexer(Constants.INDEX_PATH);
             JFileChooser fc = new JFileChooser(Constants.SNAPSHOTS_PATH);
-            
+
             int returnVal = fc.showOpenDialog(this);
-            if(returnVal == JFileChooser.APPROVE_OPTION) {
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 indexer.indexDocuments(file);
             }
@@ -172,6 +191,19 @@ public class MainWindow extends javax.swing.JFrame {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_loadSnapshotMenuItemActionPerformed
+
+    private void editorPaneHyperlinkUpdate(javax.swing.event.HyperlinkEvent evt) {//GEN-FIRST:event_editorPaneHyperlinkUpdate
+        // TODO add your handling code here:
+        if(evt.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            if(Desktop.isDesktopSupported()) {
+                try {
+                    Desktop.getDesktop().browse(evt.getURL().toURI());
+                } catch (URISyntaxException | IOException ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }//GEN-LAST:event_editorPaneHyperlinkUpdate
 
     /**
      * @param args the command line arguments
@@ -207,15 +239,16 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
     }
-    
+
     private void initLogic() {
         try {
             searcher = new Searcher();
             sorter = new Sorter(searcher);
+            htmlGenerator = new HTMLGenerator(searcher, sorter);
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

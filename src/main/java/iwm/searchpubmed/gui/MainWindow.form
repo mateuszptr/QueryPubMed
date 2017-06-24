@@ -143,8 +143,11 @@
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="hyperlinkUpdate" listener="javax.swing.event.HyperlinkListener" parameters="javax.swing.event.HyperlinkEvent" handler="editorPaneHyperlinkUpdate"/>
+          </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="HTMLEditorKit kit = new HTMLEditorKit();&#xa;editorPane.setEditorKit(kit);&#xa;&#xa;String htmlString = &quot;&lt;h1&gt;Welcome&lt;/h1&gt;&quot;;&#xa;Document doc = kit.createDefaultDocument();&#xa;editorPane.setDocument(doc);&#xa;editorPane.setText(htmlString);"/>
+            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="HTMLEditorKit kit = new HTMLEditorKit();&#xa;editorPane.setEditorKit(kit);&#xa;&#xa;String htmlString = &quot;&lt;table&gt;&lt;tr&gt;&lt;td&gt;Keyword:&lt;/td&gt;&lt;td&gt;&lt;input&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;;&#xa;Document doc = kit.createDefaultDocument();&#xa;editorPane.setDocument(doc);&#xa;editorPane.setText(htmlString);"/>
           </AuxValues>
         </Component>
       </SubComponents>

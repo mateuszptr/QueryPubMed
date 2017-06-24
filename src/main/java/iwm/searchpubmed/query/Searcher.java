@@ -9,16 +9,21 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
 import iwm.searchpubmed.Constants;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.StopwordAnalyzerBase;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
@@ -48,16 +53,24 @@ public class Searcher {
         indexSearcher = new IndexSearcher(getReader());
 
     }
-    
+
     public String[] termList(String queryString) {
         try {
             CharArraySet arraySet = new CharArraySet(Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH)), true);
-            QueryParser dummy = new QueryParser("", new EnglishAnalyzer(arraySet));
-            String parsedString = dummy.parse(queryString).toString();
-            
-            String[] termList = parsedString.split("\\s+");
-            return termList;
-        } catch (IOException | ParseException ex) {
+            TokenStream ts = new EnglishAnalyzer(arraySet).tokenStream("", new StringReader(queryString));
+            CharTermAttribute cta = ts.addAttribute(CharTermAttribute.class);
+            List<String> termList = new ArrayList<>();
+
+            ts.reset();
+            do {
+                if (!cta.toString().equals("")) {
+                    termList.add(cta.toString());
+                }
+            } while (ts.incrementToken());
+            ts.end();
+            ts.close();
+            return termList.toArray(new String[termList.size()]);
+        } catch (IOException ex) {
             Logger.getLogger(Searcher.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
@@ -67,7 +80,7 @@ public class Searcher {
         Query query = getParser().parse(queryString);
 
         TopDocs hits = getIndexSearcher().search(query, Constants.MAX_DOCS);
-        
+
         return hits;
     }
 

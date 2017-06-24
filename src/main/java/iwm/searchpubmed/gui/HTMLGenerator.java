@@ -20,35 +20,32 @@ import org.apache.lucene.search.TopDocs;
 public class HTMLGenerator {
     StringBuilder htmlText;
     Searcher searcher;
-    String queryString;
-    TopDocs hits;
+    Sorter sorter;
 
-    public HTMLGenerator(Searcher searcher, String queryString, TopDocs hits) {
-        htmlText = new StringBuilder();
+    public HTMLGenerator(Searcher searcher, Sorter sorter) {
         this.searcher = searcher;
-        this.queryString = queryString;
-        this.hits = hits;
+        this.sorter = sorter;
     }
     
     
-    
-    void query() {
-        htmlText.append("<h2>Processed Query: ");
+    void query(String queryString) {
+        htmlText.append("<h1>Processed Query: ");
         htmlText.append(searcher.termList(queryString));
-        htmlText.append("</h2>\n");
+        htmlText.append("</h1>");
     }
     
-    void article(Document doc) {
+    void article(Document doc, double score) {
         String title = doc.getField("articletitle").stringValue();
-        htmlText.append("<a href=\"https://www.ncbi.nlm.nih.gov/pubmed/").append(doc.getField("pmid")).append("\">");
-        htmlText.append("<h3>");
+        htmlText.append("<a href=\"https://www.ncbi.nlm.nih.gov/pubmed/").append(doc.getField("pmid").stringValue()).append("\">");
+        htmlText.append("<h2>");
         htmlText.append(title);
-        htmlText.append("</h3></a>");
-//        for(IndexableField f : doc.getFields("abstracttext")) {
-//            htmlText.append("<p>");
-//            htmlText.append(f.stringValue());
-//            htmlText.append("</p>");
-//        }
+        htmlText.append("</h2></a>");
+        htmlText.append("<p>Score: ").append(score).append("</p>");
+        for(IndexableField f : doc.getFields("abstracttext")) {
+            htmlText.append("<p>");
+            htmlText.append(f.stringValue());
+            htmlText.append("</p>");
+        }
         htmlText.append("<p><b>Keywords: </b>");
         for(IndexableField f : doc.getFields("keyword")) {
             htmlText.append(f.stringValue());
@@ -59,12 +56,13 @@ public class HTMLGenerator {
         
     }
     
-    public String generateHTML() throws IOException {
-        
-        query();
+    public String generateHTML(String queryString, TopDocs hits) throws IOException {
+        htmlText = new StringBuilder();
+        query(queryString);
         for(ScoreDoc sd : hits.scoreDocs) {
-            article(searcher.getIndexSearcher().doc(sd.doc));
+            article(searcher.getIndexSearcher().doc(sd.doc), sorter.getScores().get(sd));
         }
+        htmlText.append("<hr>");
         
         return htmlText.toString();
     }
