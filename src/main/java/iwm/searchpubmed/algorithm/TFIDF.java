@@ -41,17 +41,21 @@ import org.apache.lucene.search.TopDocs;
 public class TFIDF {
 
     Map<String, Double> idfs;
-    String[] termList;
+    Map<String, Double> termMap;
+    public Map<String, Map<String, Double>> docMaps;
 
     public TFIDF(String queryString, Searcher searcher, TopDocs hits) throws IOException, ParseException {
-        idfs = new HashMap<>();
-
-        arraySet = new CharArraySet(Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH)), true);
-
-        termList = searcher.termList(queryString);
-        idf(searcher, hits);
-
+        this(queryString, searcher, hits, searcher.termMap(queryString));
     }
+
+    public TFIDF(String queryString, Searcher searcher, TopDocs hits, Map<String, Double> termMap) throws IOException, ParseException {
+        idfs = new HashMap<>();
+        arraySet = new CharArraySet(Files.readAllLines(Paths.get(Constants.STOPWORDS_PATH)), true);
+        this.termMap = termMap;
+        idf(searcher, hits);
+        docMaps = new HashMap<>();
+    }
+
     CharArraySet arraySet;
 
     private String[] fieldTerms(IndexableField f) throws IOException {
@@ -77,8 +81,12 @@ public class TFIDF {
     public double score(Document doc, boolean idf) throws IOException {
 
         Map<String, Double> scores = new HashMap<>();
+        Map<String, Double> rawTFs = new HashMap<>();
 
-        for (String term : termList) {
+        for (Map.Entry<String, Double> entry : termMap.entrySet()) {
+            double rawTF = 0;
+            String term = entry.getKey();
+            double baseWeigth = entry.getValue();
             int wordCount = 0, termCount = 0;
             for (IndexableField f : doc.getFields()) {
                 String words[] = fieldTerms(f);
@@ -89,19 +97,23 @@ public class TFIDF {
                         termCount++;
                     }
                 }
-                double score;
-                if (termCount > 0) {
-                    score = 1.0 + Math.log10(termCount);
-                } else {
-                    score = 0.0;
-                }
-                if (idf) {
-                    score *= idfs.get(term);
-                }
-                scores.put(term, score);
             }
+            double score = baseWeigth;
+            if (termCount > 0) {
+                score *= 1.0 + Math.log10(termCount);
+                rawTF = 1.0 + Math.log10(termCount);
+            } else {
+                score = 0.0;
+            }
+            if (idf) {
+                score *= idfs.get(term);
+            }
+            scores.put(term, score);
+            rawTFs.put(term, rawTF);
+
         }
 
+        docMaps.put(doc.getField("pmid").stringValue(), rawTFs);
         return scores.values().stream().mapToDouble(t -> t).average().getAsDouble();
     }
 
@@ -134,7 +146,7 @@ public class TFIDF {
 //            double score = Math.log(docsCount / (count + 1.0));
 //            idfs.put(term, score);
 //        }
-        for (String term : termList) {
+        for (String term : termMap.keySet()) {
             Query termQuery = searcher.getParser().parse(term);
             int count = searcher.getIndexSearcher().count(termQuery);
             int docsCount = searcher.getIndexSearcher().getIndexReader().numDocs();

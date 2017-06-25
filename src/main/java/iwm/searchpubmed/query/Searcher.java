@@ -14,7 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.Analyzer;
@@ -74,6 +76,21 @@ public class Searcher {
             Logger.getLogger(Searcher.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    public Map<String, Double> termMap(String queryString) {
+        Map<String, Double> termDict = new HashMap<>();
+        String[] termArray = termList(queryString);
+
+        for (String term : termArray) {
+            if (termDict.get(term) == null) {
+                termDict.put(term, 1.0);
+            } else {
+                termDict.put(term, termDict.get(term)+1.0);
+            }
+        }
+        
+        return termDict;
     }
 
     public TopDocs search(String queryString) throws ParseException, IOException {

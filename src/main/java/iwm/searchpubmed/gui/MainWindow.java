@@ -6,18 +6,35 @@
 package iwm.searchpubmed.gui;
 
 import iwm.searchpubmed.Constants;
+import iwm.searchpubmed.algorithm.Rocchio;
 import iwm.searchpubmed.indexer.Indexer;
 import iwm.searchpubmed.query.Searcher;
 import iwm.searchpubmed.query.Sorter;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
+import javax.swing.JToggleButton;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.ElementIterator;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -51,6 +68,8 @@ public class MainWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jButton2 = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         searchTextField = new javax.swing.JTextField();
         searchButton = new javax.swing.JButton();
         tfCheckBox = new javax.swing.JCheckBox();
@@ -59,9 +78,15 @@ public class MainWindow extends javax.swing.JFrame {
         eigenCheckBox = new javax.swing.JCheckBox();
         editorScrollPane = new javax.swing.JScrollPane();
         editorPane = new javax.swing.JEditorPane();
+        rocchioButton = new javax.swing.JButton();
+        manualButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         loadSnapshotMenuItem = new javax.swing.JMenuItem();
+
+        jButton2.setText("jButton2");
+
+        jButton1.setText("Manual");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -95,10 +120,25 @@ public class MainWindow extends javax.swing.JFrame {
         HTMLEditorKit kit = new HTMLEditorKit();
         editorPane.setEditorKit(kit);
 
-        String htmlString = "<table><tr><td>Keyword:</td><td><input></td></tr></table>";
+        String htmlString = "<table><tr><td>Keyword:</td><td><input id=\"beka\"></td></tr>"
+        + "<tr><td>Useful?</td><td><input type='checkbox' id='pmid'></td></tr></table>";
         Document doc = kit.createDefaultDocument();
         editorPane.setDocument(doc);
         editorPane.setText(htmlString);
+
+        rocchioButton.setText("Rocchio");
+        rocchioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rocchioButtonActionPerformed(evt);
+            }
+        });
+
+        manualButton.setText("Manual");
+        manualButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                manualButtonActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText("Plik");
 
@@ -123,20 +163,24 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(editorScrollPane)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(searchTextField)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(searchButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(tfCheckBox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(idfCheckBox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(ifCheckBox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(eigenCheckBox)
-                        .addGap(0, 215, Short.MAX_VALUE)))
+                    .addComponent(editorScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(tfCheckBox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(idfCheckBox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(ifCheckBox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(eigenCheckBox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(manualButton))
+                            .addComponent(searchTextField))
+                        .addGap(4, 4, 4)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(searchButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(rocchioButton, javax.swing.GroupLayout.Alignment.TRAILING))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -151,9 +195,11 @@ public class MainWindow extends javax.swing.JFrame {
                     .addComponent(tfCheckBox)
                     .addComponent(idfCheckBox)
                     .addComponent(ifCheckBox)
-                    .addComponent(eigenCheckBox))
+                    .addComponent(eigenCheckBox)
+                    .addComponent(rocchioButton)
+                    .addComponent(manualButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(editorScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
+                .addComponent(editorScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -164,7 +210,7 @@ public class MainWindow extends javax.swing.JFrame {
         try {
             // TODO add your handling code here:
             System.out.println("iwm.searchpubmed.gui.MainWindow.searchButtonActionPerformed()");
-            String queryString = searchTextField.getText();
+            queryString = searchTextField.getText();
             TopDocs hits = sorter.sortedDocuments(queryString, idfCheckBox.isSelected(), ifCheckBox.isSelected(), eigenCheckBox.isSelected());
             String htmlText = htmlGenerator.generateHTML(queryString, hits);
             editorPane.setText(htmlText);
@@ -173,6 +219,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_searchButtonActionPerformed
+    String queryString;
 
     private void loadSnapshotMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadSnapshotMenuItemActionPerformed
         try {
@@ -194,8 +241,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void editorPaneHyperlinkUpdate(javax.swing.event.HyperlinkEvent evt) {//GEN-FIRST:event_editorPaneHyperlinkUpdate
         // TODO add your handling code here:
-        if(evt.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-            if(Desktop.isDesktopSupported()) {
+        if (evt.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            if (Desktop.isDesktopSupported()) {
                 try {
                     Desktop.getDesktop().browse(evt.getURL().toURI());
                 } catch (URISyntaxException | IOException ex) {
@@ -204,6 +251,39 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_editorPaneHyperlinkUpdate
+
+    private void rocchioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rocchioButtonActionPerformed
+        try {
+            // TODO add your handling code here:
+            System.out.println("iwm.searchpubmed.gui.MainWindow.rocchioButtonActionPerformed()");
+            Map<String, Double> map = Rocchio.rocchioWeigths(collectWeigths(searcher.termMap(queryString).keySet()), getUsefulDocMaps(sorter.docMaps));
+            TopDocs hits = sorter.sortedDocuments(queryString, idfCheckBox.isSelected(), ifCheckBox.isSelected(), eigenCheckBox.isSelected(),
+                    map);
+            String htmlText = htmlGenerator.generateHTML(queryString, hits, map);
+            editorPane.setText(htmlText);
+        } catch (IOException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_rocchioButtonActionPerformed
+
+    private void manualButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_manualButtonActionPerformed
+
+        try {
+            System.out.println("iwm.searchpubmed.gui.MainWindow.manualButtonActionPerformed()");
+            TopDocs hits = sorter.sortedDocuments(queryString, idfCheckBox.isSelected(), ifCheckBox.isSelected(), eigenCheckBox.isSelected(), collectWeigths(searcher.termMap(queryString).keySet()));
+            String htmlText = htmlGenerator.generateHTML(queryString, hits, collectWeigths(searcher.termMap(queryString).keySet()));
+            editorPane.setText(htmlText);
+        } catch (IOException | ParseException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+//        try {
+//            testComponents();
+//        } catch (BadLocationException ex) {
+//            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+    }//GEN-LAST:event_manualButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -240,6 +320,61 @@ public class MainWindow extends javax.swing.JFrame {
         });
     }
 
+    private Map<String, Double> collectWeigths(Collection<String> terms) {
+        HTMLDocument doc = (HTMLDocument) editorPane.getDocument();
+        Map<String, Double> termMap = new HashMap<>();
+        for (String term : terms) {
+            Element elem = doc.getElement(term);
+            AttributeSet as = elem.getAttributes();
+            Enumeration enumm = as.getAttributeNames();
+
+            while (enumm.hasMoreElements()) {
+                Object name = enumm.nextElement();
+                Object value = as.getAttribute(name);
+                if (value instanceof PlainDocument) {
+                    PlainDocument model = (PlainDocument) value;
+                    String text = null;
+                    try {
+                        text = model.getText(model.getStartPosition().getOffset(), model.getLength());
+                    } catch (BadLocationException ex) {
+                        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    termMap.put(term, Double.valueOf(text));
+                }
+            }
+
+        }
+
+        return termMap;
+    }
+
+    private List<Map<String, Double>> getUsefulDocMaps(Map<String, Map<String, Double>> termMaps) {
+        List<Map<String, Double>> output = new LinkedList<>();
+        HTMLDocument doc = (HTMLDocument) editorPane.getDocument();
+        for (Map.Entry<String, Map<String, Double>> entry : termMaps.entrySet()) {
+            String pmid = entry.getKey();
+            Map<String, Double> docMap = entry.getValue();
+
+            Element elem = doc.getElement(pmid);
+            AttributeSet as = elem.getAttributes();
+            Enumeration enumm = as.getAttributeNames();
+
+            while (enumm.hasMoreElements()) {
+                Object name = enumm.nextElement();
+                Object value = as.getAttribute(name);
+                if (value instanceof JToggleButton.ToggleButtonModel) {
+                    JToggleButton.ToggleButtonModel model = (JToggleButton.ToggleButtonModel) value;
+                    if(model.isSelected()) {
+                        output.add(docMap);
+                    }
+                }
+            }
+
+        }
+
+        return output;
+    }
+
     private void initLogic() {
         try {
             searcher = new Searcher();
@@ -248,7 +383,60 @@ public class MainWindow extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
+        try {
+            testComponents();
+        } catch (BadLocationException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
+    }
+
+    private void testComponents() throws BadLocationException {
+        HTMLDocument doc = (HTMLDocument) editorPane.getDocument();
+        ElementIterator it = new ElementIterator(doc);
+        Element element;
+
+        while ((element = it.next()) != null) {
+            System.out.println();
+
+            AttributeSet as = element.getAttributes();
+            Enumeration enumm = as.getAttributeNames();
+
+            while (enumm.hasMoreElements()) {
+                Object name = enumm.nextElement();
+                Object value = as.getAttribute(name);
+                System.out.println("\t" + name + " : " + value);
+
+                if (value instanceof DefaultComboBoxModel) {
+                    DefaultComboBoxModel model = (DefaultComboBoxModel) value;
+
+                    for (int j = 0; j < model.getSize(); j++) {
+                        Object o = model.getElementAt(j);
+                        Object selected = model.getSelectedItem();
+                        System.out.print("\t\t");
+
+                        if (o.equals(selected)) {
+                            System.out.println(o + " : selected");
+                        } else {
+                            System.out.println(o);
+                        }
+                    }
+                }
+
+                if (value instanceof PlainDocument) {
+                    PlainDocument model = (PlainDocument) value;
+                    String text = model.getText(model.getStartPosition().getOffset(), model.getLength());
+                    System.out.println(as.getAttribute("id") + " " + text);
+                }
+
+            }
+        }
+
+        //  display the components added to the editor pane
+        for (Component c : editorPane.getComponents()) {
+            Container parent = (Container) c;
+            System.out.println(parent.getComponent(0).getClass());
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -257,9 +445,13 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox eigenCheckBox;
     private javax.swing.JCheckBox idfCheckBox;
     private javax.swing.JCheckBox ifCheckBox;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem loadSnapshotMenuItem;
+    private javax.swing.JButton manualButton;
+    private javax.swing.JButton rocchioButton;
     private javax.swing.JButton searchButton;
     private javax.swing.JTextField searchTextField;
     private javax.swing.JCheckBox tfCheckBox;

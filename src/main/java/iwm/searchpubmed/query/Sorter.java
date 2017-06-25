@@ -27,6 +27,7 @@ public class Sorter {
 
     Searcher searcher;
     ImpactFactorDatabase impactFactorDatabase;
+    public Map<String, Map<String, Double>> docMaps;
 
     public Sorter(Searcher searcher) {
         this.searcher = searcher;
@@ -37,6 +38,35 @@ public class Sorter {
         }
     }
 
+    public TopDocs sortedDocuments(String queryString, boolean idf, boolean impactFactor, boolean eigenfactor, Map<String, Double> termMap) throws IOException, ParseException {
+        TopDocs hits = searcher.search(queryString);
+
+        TFIDF tfidf = new TFIDF(queryString, searcher, hits, termMap);
+
+        scores = new HashMap<>();
+
+        for (ScoreDoc doc : hits.scoreDocs) {
+            Document d = searcher.getIndexSearcher().doc(doc.doc);
+            double score = tfidf.score(d, idf);
+            if (impactFactor) {
+                score *= impactFactorDatabase.getImpactFactor(d);
+            }
+            if (eigenfactor) {
+                score *= impactFactorDatabase.getEigenfactor(d);
+            }
+            getScores().put(doc, score);
+        }
+        docMaps = tfidf.docMaps;
+        
+
+        Arrays.sort(hits.scoreDocs, (ScoreDoc t, ScoreDoc t1) -> {
+            return -Double.compare(scores.get(t), scores.get(t1));
+        });
+        
+
+        return hits;
+    }
+    
     public TopDocs sortedDocuments(String queryString, boolean idf, boolean impactFactor, boolean eigenfactor) throws IOException, ParseException {
         TopDocs hits = searcher.search(queryString);
 
@@ -55,6 +85,7 @@ public class Sorter {
             }
             getScores().put(doc, score);
         }
+        docMaps = tfidf.docMaps;
 
         Arrays.sort(hits.scoreDocs, (ScoreDoc t, ScoreDoc t1) -> {
             return -Double.compare(scores.get(t), scores.get(t1));
@@ -63,6 +94,7 @@ public class Sorter {
 
         return hits;
     }
+    
     private Map<ScoreDoc, Double> scores;
 
     /**
