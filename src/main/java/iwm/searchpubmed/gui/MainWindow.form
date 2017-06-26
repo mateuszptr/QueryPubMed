@@ -165,7 +165,7 @@
             <EventHandler event="hyperlinkUpdate" listener="javax.swing.event.HyperlinkListener" parameters="javax.swing.event.HyperlinkEvent" handler="editorPaneHyperlinkUpdate"/>
           </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="HTMLEditorKit kit = new HTMLEditorKit();&#xa;editorPane.setEditorKit(kit);&#xa;&#xa;String htmlString = &quot;&lt;table&gt;&lt;tr&gt;&lt;td&gt;Keyword:&lt;/td&gt;&lt;td&gt;&lt;input id=\&quot;beka\&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&quot;&#xa;+ &quot;&lt;tr&gt;&lt;td&gt;Useful?&lt;/td&gt;&lt;td&gt;&lt;input type=&apos;checkbox&apos; id=&apos;pmid&apos;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;;&#xa;Document doc = kit.createDefaultDocument();&#xa;editorPane.setDocument(doc);&#xa;editorPane.setText(htmlString);"/>
+            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="HTMLEditorKit kit = new HTMLEditorKit();&#xa;editorPane.setEditorKit(kit);&#xa;&#xa;String htmlString = &quot;&quot;;&#xa;Document doc = kit.createDefaultDocument();&#xa;editorPane.setDocument(doc);&#xa;editorPane.setText(htmlString);"/>
           </AuxValues>
         </Component>
       </SubComponents>

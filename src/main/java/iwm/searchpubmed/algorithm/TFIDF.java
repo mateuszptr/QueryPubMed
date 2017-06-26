@@ -134,18 +134,7 @@ public class TFIDF {
     }
 
     private void idf(Searcher searcher, TopDocs hits) throws IOException, ParseException {
-//        int docsCount = hits.scoreDocs.length;
-//        for (String term : termList) {
-//            int count = 0;
-//            for (ScoreDoc sd : hits.scoreDocs) {
-//                Document d = searcher.doc(sd.doc);
-//                if (contains(d, term)) {
-//                    count++;
-//                }
-//            }
-//            double score = Math.log(docsCount / (count + 1.0));
-//            idfs.put(term, score);
-//        }
+
         for (String term : termMap.keySet()) {
             Query termQuery = searcher.getParser().parse(term);
             int count = searcher.getIndexSearcher().count(termQuery);

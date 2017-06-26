@@ -48,10 +48,10 @@ public class HTMLGenerator {
         query(queryString, searcher.termMap(queryString));
     }
     
-    void article(Document doc, double score) {
+    void article(Document doc, double score, int no) {
         String title = doc.getField("articletitle").stringValue();
         htmlText.append("<a href=\"https://www.ncbi.nlm.nih.gov/pubmed/").append(doc.getField("pmid").stringValue()).append("\">");
-        htmlText.append("<h2>");
+        htmlText.append("<h2>").append(no).append(". ");
         htmlText.append(escapeHtml4(title));
         htmlText.append("</h2></a>");
         htmlText.append("<p>Score: ").append(score).append("</p>");
@@ -75,8 +75,10 @@ public class HTMLGenerator {
     public String generateHTML(String queryString, TopDocs hits, Map<String, Double> termMap) throws IOException {
         htmlText = new StringBuilder();
         query(queryString, termMap);
+        int i=0;
         for(ScoreDoc sd : hits.scoreDocs) {
-            article(searcher.getIndexSearcher().doc(sd.doc), sorter.getScores().get(sd));
+            i++;
+            article(searcher.getIndexSearcher().doc(sd.doc), sorter.getScores().get(sd), i);
         }
         htmlText.append("<hr>");
         
@@ -86,8 +88,10 @@ public class HTMLGenerator {
     public String generateHTML(String queryString, TopDocs hits) throws IOException {
         htmlText = new StringBuilder();
         query(queryString);
+        int i=0;
         for(ScoreDoc sd : hits.scoreDocs) {
-            article(searcher.getIndexSearcher().doc(sd.doc), sorter.getScores().get(sd));
+            i++;
+            article(searcher.getIndexSearcher().doc(sd.doc), sorter.getScores().get(sd), i);
         }
         htmlText.append("<hr>");
         

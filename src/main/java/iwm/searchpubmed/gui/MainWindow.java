@@ -120,8 +120,7 @@ public class MainWindow extends javax.swing.JFrame {
         HTMLEditorKit kit = new HTMLEditorKit();
         editorPane.setEditorKit(kit);
 
-        String htmlString = "<table><tr><td>Keyword:</td><td><input id=\"beka\"></td></tr>"
-        + "<tr><td>Useful?</td><td><input type='checkbox' id='pmid'></td></tr></table>";
+        String htmlString = "";
         Document doc = kit.createDefaultDocument();
         editorPane.setDocument(doc);
         editorPane.setText(htmlString);
